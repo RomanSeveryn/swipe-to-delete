@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
+import { RefreshControl, SafeAreaView, StyleSheet, Text } from 'react-native';
 import { useCallback, useRef, useState } from 'react';
 import { ListItem } from './components/ListItem';
 import {
@@ -8,16 +8,6 @@ import {
 } from 'react-native-gesture-handler';
 
 const TITLES = [
-  'first title hello',
-  'second title hello',
-  'third title hello',
-  'fourth title hello',
-  'fifth title hello',
-  'first title hello',
-  'second title hello',
-  'third title hello',
-  'fourth title hello',
-  'fifth title hello',
   'first title hello',
   'second title hello',
   'third title hello',
@@ -40,11 +30,29 @@ function App() {
     setTasks((tasks) => tasks.filter((item) => item.index !== task.index));
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    wait(2000).then(() => {
+      setRefreshing(false);
+      setTasks(TASKS);
+    });
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Tasks</Text>
       <StatusBar style='auto' />
-      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {tasks.map((task) => {
           return (
             <ListItem
@@ -77,5 +85,8 @@ const styles = StyleSheet.create({
     fontSize: 60,
     marginVertical: 20,
     paddingLeft: '5%',
+  },
+  scrollContainer: {
+    flex: 1,
   },
 });
